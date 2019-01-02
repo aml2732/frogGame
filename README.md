@@ -4,7 +4,7 @@ NOTE: In progress!!!!!! Very incomplete
 
 This project aims to explore the [PIXIJS Library](http://www.pixijs.com/) and act as an introduction to its capabilities.
 
-![screenshot of current frog game progress](screenshot.JPG)
+![screenshot of current frog game progress](./docs/screenshot.JPG)
 
 # Running locally
 
