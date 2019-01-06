@@ -1,4 +1,5 @@
 //Game Functions ---------------------------------------------------------------
+
 function drawBackground(){
   //draw water
   graphics.beginFill("0x2878E1");
@@ -64,6 +65,66 @@ function drawFrog(){
   app.stage.addChild(frog);
 }
 
+
+function spawn(seconds){
+  let index = Math.floor(seconds/10);
+  if((index == 5 && !spawnTimes[index]) || (index == 4 && !spawnTimes[index]) ||
+  (index == 3 && !spawnTimes[index]) || (index == 2 && !spawnTimes[index]) ||
+  (index == 1 && !spawnTimes[index]) || (index == 0 && !spawnTimes[index])){
+    let amountToSpawn = Math.floor(Math.random() * 10) + 1;
+
+    for(let i=0;i<amountToSpawn; i++){ // spawn anywhere between 1 to 10 bugs
+      let fly = PIXI.Sprite.fromImage('./img/fly.png');
+      fly.anchor.set(0.5);
+      fly.x = Math.floor(Math.random() * app.renderer.width);
+      fly.y = Math.floor(Math.random() * app.renderer.height);
+      let thisFlyDirection_X = 1; let thisFlyDirection_Y = 1;
+      app.stage.addChild(fly);
+      app.ticker.add(function(delta){
+        let probability = Math.floor(Math.random()*10);
+//        console.log("probability fly("+seconds+":"+i+"): "+probability);
+        if(probability == 4){ //there is a 1/5 chance of this being picked, change dir.
+          thisFlyDirection_X = (Math.floor(Math.random() * 2 )) ? 1 : -1;
+          thisFlyDirection_Y = (Math.floor(Math.random() * 2 )) ? 1 : -1;
+        }
+        fly.x = (delta*2 * thisFlyDirection_X) + fly.x;
+        fly.y = (delta*2 * thisFlyDirection_Y) + fly.y;
+        fly.rotation += 0.1 * delta;
+      });
+    }
+
+    spawnTimes[index] = true;
+
+  }
+  else{}//noop
+}
+
+function gameOver(){
+  alert('game over your score is '+score);
+}
+
+function play(){
+  let now = new Date();
+  let futureDate = new Date(); futureDate.setMinutes(futureDate.getMinutes() + 1);
+  let minutes = 0; let seconds = 0;
+  let topText = new PIXI.Text(`Time Remaining: ${minutes}:${seconds}`, {});
+  app.stage.addChild(topText);
+  var interval = setInterval(function(){
+    let difference = futureDate - now;
+    minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    seconds = Math.floor((difference % (1000 * 60)) / 1000);
+    now = new Date();
+    topText.setText(`Time Remaining: ${minutes}:${seconds}`);
+
+    spawn(seconds);
+
+    if(minutes<1 && seconds < 1){
+      clearInterval(interval);
+      gameOver();
+    }
+  },1000);
+
+}
 //Main execution ---------------------------------------------------------------
 
 let type = "WebGL"
@@ -84,6 +145,8 @@ let lillyCount = 0;
 let lillyDirection = 1;
 
 let frog = PIXI.Sprite.fromImage('./img/frog.png');
+let score = 0;
+let spawnTimes = [false, false,false, false, false, false];
 
 
 //set background
@@ -94,3 +157,4 @@ let lilyPadCenter_y = (app.renderer.height/2 + 160);
 drawBackground();
 drawLilypads();
 drawFrog();
+play();
