@@ -78,11 +78,17 @@ function spawn(seconds){
       fly.anchor.set(0.5);
       fly.x = Math.floor(Math.random() * app.renderer.width);
       fly.y = Math.floor(Math.random() * app.renderer.height);
+      fly.interactive = true;
+      fly.buttonMode = true;
       let thisFlyDirection_X = 1; let thisFlyDirection_Y = 1;
+      function onClick(){
+        score +=1;
+        app.stage.removeChild(fly);
+      };
+      fly.on('pointerdown', onClick);
       app.stage.addChild(fly);
       app.ticker.add(function(delta){
         let probability = Math.floor(Math.random()*10);
-//        console.log("probability fly("+seconds+":"+i+"): "+probability);
         if(probability == 4){ //there is a 1/5 chance of this being picked, change dir.
           thisFlyDirection_X = (Math.floor(Math.random() * 2 )) ? 1 : -1;
           thisFlyDirection_Y = (Math.floor(Math.random() * 2 )) ? 1 : -1;
