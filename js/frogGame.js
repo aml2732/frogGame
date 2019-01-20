@@ -57,7 +57,6 @@ function drawLilypads(){
 }
 
 function drawFrog(){
-  console.log('got to draw frog')
   frog.setTransform(0,0,0.5,0.5,0);
   frog.anchor.set(0.5,1);
   frog.x = lilyPadCenter_x;
@@ -81,8 +80,26 @@ function spawn(seconds){
       fly.interactive = true;
       fly.buttonMode = true;
       let thisFlyDirection_X = 1; let thisFlyDirection_Y = 1;
-      function onClick(){
+      function onClick(event){
         score +=1;
+
+        var g = new PIXI.Graphics();
+
+        g.beginFill(0xFFC0CB);
+        g.moveTo(lilyPadCenter_x, lilyPadCenter_y-80);
+        g.lineTo(event.data.global.x+15, event.data.global.y);
+        g.lineTo(event.data.global.x-15, event.data.global.y);
+        g.endFill();
+
+        g.beginFill(0xFFC0CB);
+        g.drawCircle(event.data.global.x, event.data.global.y,20);
+        g.endFill();
+        app.stage.addChild(g);
+        setTimeout(function(){
+          app.stage.removeChild(g);
+        },600)
+
+
         app.stage.removeChild(fly);
       };
       fly.on('pointerdown', onClick);
@@ -108,6 +125,7 @@ function spawn(seconds){
 function gameOver(){
   alert('game over your score is '+score);
 }
+
 
 function play(){
   let now = new Date();
