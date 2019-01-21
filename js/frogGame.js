@@ -64,6 +64,23 @@ function drawFrog(){
   app.stage.addChild(frog);
 }
 
+function drawTongue(event){
+  var g = new PIXI.Graphics();
+
+  g.beginFill(0xFFC0CB);
+  g.moveTo(lilyPadCenter_x, lilyPadCenter_y-80);
+  g.lineTo(event.data.global.x+15, event.data.global.y);
+  g.lineTo(event.data.global.x-15, event.data.global.y);
+  g.endFill();
+
+  g.beginFill(0xFFC0CB);
+  g.drawCircle(event.data.global.x, event.data.global.y,20);
+  g.endFill();
+  app.stage.addChild(g);
+  setTimeout(function(){
+    app.stage.removeChild(g);
+  },600)
+}
 
 function spawn(seconds){
   let index = Math.floor(seconds/10);
@@ -82,24 +99,6 @@ function spawn(seconds){
       let thisFlyDirection_X = 1; let thisFlyDirection_Y = 1;
       function onClick(event){
         score +=1;
-
-        var g = new PIXI.Graphics();
-
-        g.beginFill(0xFFC0CB);
-        g.moveTo(lilyPadCenter_x, lilyPadCenter_y-80);
-        g.lineTo(event.data.global.x+15, event.data.global.y);
-        g.lineTo(event.data.global.x-15, event.data.global.y);
-        g.endFill();
-
-        g.beginFill(0xFFC0CB);
-        g.drawCircle(event.data.global.x, event.data.global.y,20);
-        g.endFill();
-        app.stage.addChild(g);
-        setTimeout(function(){
-          app.stage.removeChild(g);
-        },600)
-
-
         app.stage.removeChild(fly);
       };
       fly.on('pointerdown', onClick);
@@ -177,6 +176,10 @@ let spawnTimes = [false, false,false, false, false, false];
 app.renderer.backgroundColor = "0x98DDF2";
 let lilyPadCenter_x = app.renderer.width/2;
 let lilyPadCenter_y = (app.renderer.height/2 + 160);
+
+//draw tongue when clicking on the stage
+let interactionManager = new PIXI.interaction.InteractionManager(app.renderer);
+interactionManager.on('pointerdown', drawTongue);
 
 drawBackground();
 drawLilypads();
