@@ -1,3 +1,13 @@
+//Global variables
+var lillypad1, lillypad2, lillypad3, frog, lilyPadCenter_x,lilyPadCenter_y;
+var ticker_l;
+var spawnTimes = [false, false,false, false, false, false];
+var lillyCount = 0;
+var lillyDirection = 1;
+var score = 0;
+var total = 0;
+var playStage, scoreStage;
+
 //Game Functions ---------------------------------------------------------------
 
 function drawBackground(){
@@ -23,22 +33,21 @@ function drawLilypads(){
   lillypad1.anchor.set(0.5);
   lillypad1.x = 100;
   lillypad1.y = (lilyPadCenter_y - 50);
-  app.stage.addChild(lillypad1);
+  playStage.addChild(lillypad1);
 
-  let lillypad2 = PIXI.Sprite.fromImage('./img/lilypad.png');
   lillypad2.setTransform(0,0,1.5,1.5,Math.PI)
   lillypad2.anchor.set(0.5);
   lillypad2.x = (app.renderer.width - 100);
   lillypad2.y = (app.renderer.height - 50);
-  app.stage.addChild(lillypad2);
+  playStage.addChild(lillypad2);
 
   lillypad3.setTransform(0,0,0.5,0.5)
   lillypad3.anchor.set(0.5);
   lillypad3.x = (app.renderer.width - 100);
   lillypad3.y = (lilyPadCenter_y - 50);
-  app.stage.addChild(lillypad3);
+  playStage.addChild(lillypad3);
 
-  app.ticker.add(function(delta) {
+  ticker_l = app.ticker.add(function(delta) {
 
     if(lillyCount > 3){
       lillyDirection = -1;
@@ -61,7 +70,7 @@ function drawFrog(){
   frog.anchor.set(0.5,1);
   frog.x = lilyPadCenter_x;
   frog.y = lilyPadCenter_y +10;
-  app.stage.addChild(frog);
+  playStage.addChild(frog);
 }
 
 function drawTongue(event){
@@ -76,9 +85,9 @@ function drawTongue(event){
   g.beginFill(0xFFC0CB);
   g.drawCircle(event.data.global.x, event.data.global.y,20);
   g.endFill();
-  app.stage.addChild(g);
+  playStage.addChild(g);
   setTimeout(function(){
-    app.stage.removeChild(g);
+    playStage.removeChild(g);
   },600)
 }
 
@@ -90,19 +99,20 @@ function spawn(seconds){
     let amountToSpawn = Math.floor(Math.random() * 10) + 1;
 
     for(let i=0;i<amountToSpawn; i++){ // spawn anywhere between 1 to 10 bugs
-      let fly = PIXI.Sprite.fromImage('./img/fly.png');
+      let fly = new Sprite(resources.fly.texture);
       fly.anchor.set(0.5);
       fly.x = Math.floor(Math.random() * app.renderer.width);
       fly.y = Math.floor(Math.random() * app.renderer.height);
       fly.interactive = true;
       fly.buttonMode = true;
       let thisFlyDirection_X = 1; let thisFlyDirection_Y = 1;
+      total +=1;
       function onClick(event){
         score +=1;
-        app.stage.removeChild(fly);
+        playStage.removeChild(fly);
       };
       fly.on('pointerdown', onClick);
-      app.stage.addChild(fly);
+      playStage.addChild(fly);
       app.ticker.add(function(delta){
         let probability = Math.floor(Math.random()*10);
         if(probability == 4){ //there is a 1/5 chance of this being picked, change dir.
@@ -122,7 +132,13 @@ function spawn(seconds){
 }
 
 function gameOver(){
-  alert('game over your score is '+score);
+  ticker_l.destroy();
+  lillypad1.destroy();
+  lillypad2.destroy();
+  lillypad3.destroy();
+  app.stage.destroy(playStage);
+  app.stage.removeChild(playStage);
+  gotoResultsPage();
 }
 
 
@@ -131,7 +147,7 @@ function play(){
   let futureDate = new Date(); futureDate.setMinutes(futureDate.getMinutes() + 1);
   let minutes = 0; let seconds = 0;
   let topText = new PIXI.Text(`Time Remaining: ${minutes}:${seconds}`, {});
-  app.stage.addChild(topText);
+  playStage.addChild(topText);
   var interval = setInterval(function(){
     let difference = futureDate - now;
     minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -148,6 +164,22 @@ function play(){
   },1000);
 
 }
+//Results page
+function gotoResultsPage(){
+  //score
+  scoreStage = new PIXI.Container();
+
+  app.renderer.backgroundColor = "0x1A5276";
+  let scoreText = new PIXI.Text(`Final Score (score/total):\n${score}/${total}`, {"fill": "white", "fontSize": "2rem","align":"center"});
+  scoreText.x = app.renderer.width/2 - scoreText.width/2;
+  scoreText.y = app.renderer.height/2 -70;
+
+  scoreStage.addChild(scoreText);
+  app.stage.addChild(scoreStage);
+  app.renderer.render(scoreStage);
+}
+
+
 //Main execution ---------------------------------------------------------------
 
 let type = "WebGL"
@@ -158,30 +190,46 @@ if(!PIXI.utils.isWebGLSupported()){
 PIXI.utils.sayHello(type);
 let app = new PIXI.Application();
 var graphics = new PIXI.Graphics();
+let loader = PIXI.loader;
+let Sprite = PIXI.Sprite;
+let resources = PIXI.loader.resources;
 document.body.appendChild(app.view);
-app.stage.addChild(graphics);
 
-//freeMoving game sprite elements
-let lillypad1 = PIXI.Sprite.fromImage('./img/lilypad.png');
-let lillypad3 = PIXI.Sprite.fromImage('./img/lilypad.png');
-let lillyCount = 0;
-let lillyDirection = 1;
+loader
+  .add('lilypad','./img/lilypad.png')
+  .add('frog','./img/frog.png')
+  .add('fly', './img/fly.png')
+  .load(setup);
 
-let frog = PIXI.Sprite.fromImage('./img/frog.png');
-let score = 0;
-let spawnTimes = [false, false,false, false, false, false];
+function setup(){
+  playStage();
+
+}
+
+function playStage(){
+  playStage = new PIXI.Container();
+  app.stage.addChild(playStage);
 
 
-//set background
-app.renderer.backgroundColor = "0x98DDF2";
-let lilyPadCenter_x = app.renderer.width/2;
-let lilyPadCenter_y = (app.renderer.height/2 + 160);
+  lillypad1 = new Sprite(resources.lilypad.texture);
+  lillypad2 = new Sprite(resources.lilypad.texture);
+  lillypad3 = new Sprite(resources.lilypad.texture);
 
-//draw tongue when clicking on the stage
-let interactionManager = new PIXI.interaction.InteractionManager(app.renderer);
-interactionManager.on('pointerdown', drawTongue);
+  frog = new Sprite(resources.frog.texture);
 
-drawBackground();
-drawLilypads();
-drawFrog();
-play();
+  playStage.addChild(graphics);
+
+  //set background
+  app.renderer.backgroundColor = "0x98DDF2";
+  lilyPadCenter_x = app.renderer.width/2;
+  lilyPadCenter_y = (app.renderer.height/2 + 160);
+
+  //draw tongue when clicking on the stage
+  let interactionManager = new PIXI.interaction.InteractionManager(app.renderer);
+  interactionManager.on('pointerdown', drawTongue);
+
+  drawBackground();
+  drawLilypads();
+  drawFrog();
+  play();
+}
