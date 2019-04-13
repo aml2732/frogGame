@@ -1,12 +1,13 @@
 //Global variables
 var lillypad1, lillypad2, lillypad3, frog, lilyPadCenter_x,lilyPadCenter_y;
-var ticker_l;
+var ticker_l,ticker_s;
 var spawnTimes = [false, false,false, false, false, false];
 var lillyCount = 0;
 var lillyDirection = 1;
 var score = 0;
 var total = 0;
-var playStage, scoreStage;
+var playStage, scoreStage, landingStage;
+var startButton, scoreText, startText;
 
 //Game Functions ---------------------------------------------------------------
 
@@ -164,19 +165,55 @@ function play(){
   },1000);
 
 }
+
+function beginGame(){
+  app.stage.removeChild(landingStage)
+  playStageFunction();
+}
+
 //Results page
 function gotoResultsPage(){
   //score
   scoreStage = new PIXI.Container();
 
   app.renderer.backgroundColor = "0x1A5276";
-  let scoreText = new PIXI.Text(`Final Score (score/total):\n${score}/${total}`, {"fill": "white", "fontSize": "2rem","align":"center"});
+  scoreText = new PIXI.Text(`Final Score (score/total):\n${score}/${total}`, {"fill": "white", "fontSize": "2rem","align":"center"});
   scoreText.x = app.renderer.width/2 - scoreText.width/2;
   scoreText.y = app.renderer.height/2 -70;
 
   scoreStage.addChild(scoreText);
   app.stage.addChild(scoreStage);
   app.renderer.render(scoreStage);
+}
+
+//landing page
+function landingPage(){
+  landingStage = new PIXI.Container();
+  app.stage.addChild(landingStage);
+  app.renderer.backgroundColor = "0x1A5276";
+
+
+  scoreText = new PIXI.Text('Frog Game', {"fill":"white", "fontSize": "4rem", "align":"center"});
+  scoreText.x = app.renderer.width/2 - scoreText.width/2;
+  scoreText.y = app.renderer.height/2 -120;
+  landingStage.addChild(scoreText);
+
+  startButton = new Sprite(resources.button.texture);
+  startButton.x = app.renderer.width/2 - startButton.width/2;
+  startButton.y = app.renderer.height/2 - 20;
+  startButton.interactive = true;
+  startButton.buttonMode = true;
+
+
+  startText = new PIXI.Text('Play', {"fill": "white"});
+  startText.x = 25;
+  startText.y = 35;
+  startButton.addChild(startText);
+
+  ticker_s = startButton.on('pointerdown', beginGame);
+  landingStage.addChild(startButton);
+
+  app.renderer.render(landingStage);
 }
 
 
@@ -199,14 +236,15 @@ loader
   .add('lilypad','./img/lilypad.png')
   .add('frog','./img/frog.png')
   .add('fly', './img/fly.png')
+  .add('button', './img/lilypad_button.png')
   .load(setup);
 
 function setup(){
-  playStage();
-
+  //playStage();
+  landingPage();
 }
 
-function playStage(){
+function playStageFunction(){
   playStage = new PIXI.Container();
   app.stage.addChild(playStage);
 
