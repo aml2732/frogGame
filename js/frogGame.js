@@ -1,13 +1,11 @@
 //Global variables
-var lillypad1, lillypad2, lillypad3, frog, lilyPadCenter_x,lilyPadCenter_y;
-var ticker_l,ticker_s;
+var lilyPadCenter_x,lilyPadCenter_y;
 var spawnTimes = [false, false,false, false, false, false];
 var lillyCount = 0;
 var lillyDirection = 1;
 var score = 0;
 var total = 0;
 var playStage, scoreStage, landingStage;
-var startButton, scoreText, startText;
 
 //Game Functions ---------------------------------------------------------------
 
@@ -30,6 +28,10 @@ function drawBackground(){
 
 function drawLilypads(){
   //draw little lillypads
+  var lillypad1 = new Sprite(resources.lilypad.texture);
+  var lillypad2 = new Sprite(resources.lilypad.texture);
+  var lillypad3 = new Sprite(resources.lilypad.texture);
+
   lillypad1.setTransform(0,0,0.7,0.7,Math.PI)
   lillypad1.anchor.set(0.5);
   lillypad1.x = 100;
@@ -48,7 +50,7 @@ function drawLilypads(){
   lillypad3.y = (lilyPadCenter_y - 50);
   playStage.addChild(lillypad3);
 
-  ticker_l = app.ticker.add(function(delta) {
+  app.ticker.add(function(delta) {
 
     if(lillyCount > 3){
       lillyDirection = -1;
@@ -67,6 +69,7 @@ function drawLilypads(){
 }
 
 function drawFrog(){
+  var frog = new Sprite(resources.frog.texture);
   frog.setTransform(0,0,0.5,0.5,0);
   frog.anchor.set(0.5,1);
   frog.x = lilyPadCenter_x;
@@ -133,11 +136,6 @@ function spawn(seconds){
 }
 
 function gameOver(){
-  ticker_l.destroy();
-  lillypad1.destroy();
-  lillypad2.destroy();
-  lillypad3.destroy();
-  app.stage.destroy(playStage);
   app.stage.removeChild(playStage);
   gotoResultsPage();
 }
@@ -167,7 +165,11 @@ function play(){
 }
 
 function beginGame(){
-  app.stage.removeChild(landingStage)
+  app.stage.removeChild(landingStage);
+  app.stage.removeChild(scoreStage);
+  score = 0;
+  total = 0;
+  spawnTimes = [false, false,false, false, false, false];
   playStageFunction();
 }
 
@@ -177,11 +179,24 @@ function gotoResultsPage(){
   scoreStage = new PIXI.Container();
 
   app.renderer.backgroundColor = "0x1A5276";
-  scoreText = new PIXI.Text(`Final Score (score/total):\n${score}/${total}`, {"fill": "white", "fontSize": "2rem","align":"center"});
+  var scoreText = new PIXI.Text(`Final Score (score/total):\n${score}/${total}`, {"fill": "white", "fontSize": "2rem","align":"center"});
   scoreText.x = app.renderer.width/2 - scoreText.width/2;
-  scoreText.y = app.renderer.height/2 -70;
+  scoreText.y = app.renderer.height/2 -120;
+
+  var startButton = new Sprite(resources.button.texture);
+  startButton.x = app.renderer.width/2 - startButton.width/2;
+  startButton.y = app.renderer.height/2 - 20;
+  startButton.interactive = true;
+  startButton.buttonMode = true;
+
+
+  var startText = new PIXI.Text('Try Again', {"fill": "white"});
+  startText.y = 35;
+  startButton.addChild(startText);
+  startButton.on('pointerdown', beginGame);
 
   scoreStage.addChild(scoreText);
+  scoreStage.addChild(startButton);
   app.stage.addChild(scoreStage);
   app.renderer.render(scoreStage);
 }
@@ -193,24 +208,24 @@ function landingPage(){
   app.renderer.backgroundColor = "0x1A5276";
 
 
-  scoreText = new PIXI.Text('Frog Game', {"fill":"white", "fontSize": "4rem", "align":"center"});
+  var scoreText = new PIXI.Text('Frog Game', {"fill":"white", "fontSize": "4rem", "align":"center"});
   scoreText.x = app.renderer.width/2 - scoreText.width/2;
   scoreText.y = app.renderer.height/2 -120;
   landingStage.addChild(scoreText);
 
-  startButton = new Sprite(resources.button.texture);
+  var startButton = new Sprite(resources.button.texture);
   startButton.x = app.renderer.width/2 - startButton.width/2;
   startButton.y = app.renderer.height/2 - 20;
   startButton.interactive = true;
   startButton.buttonMode = true;
 
 
-  startText = new PIXI.Text('Play', {"fill": "white"});
+  var startText = new PIXI.Text('Play', {"fill": "white"});
   startText.x = 25;
   startText.y = 35;
   startButton.addChild(startText);
 
-  ticker_s = startButton.on('pointerdown', beginGame);
+  startButton.on('pointerdown', beginGame);
   landingStage.addChild(startButton);
 
   app.renderer.render(landingStage);
@@ -247,13 +262,6 @@ function setup(){
 function playStageFunction(){
   playStage = new PIXI.Container();
   app.stage.addChild(playStage);
-
-
-  lillypad1 = new Sprite(resources.lilypad.texture);
-  lillypad2 = new Sprite(resources.lilypad.texture);
-  lillypad3 = new Sprite(resources.lilypad.texture);
-
-  frog = new Sprite(resources.frog.texture);
 
   playStage.addChild(graphics);
 
